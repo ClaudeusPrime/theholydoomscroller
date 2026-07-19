@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Holy Doomscroll</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1f4a4f">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Holy Doomscroll">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="description" content="Same endless scroll. Different fuel. Scripture that never runs out.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600&display=swap');
+
+  :root {
+    --bg-top: #0e2027;
+    --bg-mid: #163842;
+    --bg-bottom: #1f4a4f;
+    --glow-a: #3c6e77;
+    --glow-b: #2d4a53;
+    --glow-c: #4a7f77;
+    --text-main: #f5f3ec;
+    --text-sub: #a9c4c2;
+    --accent: #e8b4a0;
+    --font-display: 'Fraunces', serif;
+    --font-body: 'Inter', sans-serif;
+    --verse-size: clamp(1.5rem, 4.6vw, 2.6rem);
+    --orb-color: #e4f0ec;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    overflow-x: hidden;
+    background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 45%, var(--bg-bottom) 100%);
+    color: var(--text-main);
+    transition: background 0.7s ease, color 0.7s ease;
+  }
+
+  #ambient { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .glow { position: absolute; border-radius: 50%; filter: blur(70px); opacity: 0.35; transition: background 0.7s ease; }
+
+  #orbs { position: absolute; inset: 0; }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--orb-color, #dfe9e6) 0%, transparent 72%);
+    filter: blur(12px);
+    animation: orbFloat var(--dur, 60s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+    transition: background 0.7s ease;
+  }
+  @keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(var(--dx, 6vw), var(--dy, -8vh)) scale(1.1); }
+    100% { transform: translate(0, 0) scale(1); }
+  }
+  .glow.a { width: 60vmax; height: 60vmax; top: -20vmax; left: -15vmax; background: radial-gradient(circle, var(--glow-a) 0%, transparent 70%); animation: drift1 70s ease-in-out infinite; }
+  .glow.b { width: 55vmax; height: 55vmax; bottom: -25vmax; right: -18vmax; background: radial-gradient(circle, var(--glow-b) 0%, transparent 70%); animation: drift2 90s ease-in-out infinite; }
+  .glow.c { width: 40vmax; height: 40vmax; top: 40%; left: 50%; background: radial-gradient(circle, var(--glow-c) 0%, transparent 70%); animation: drift3 100s ease-in-out infinite; opacity: 0.22; }
+
+  @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vw, 8vh) scale(1.12); } }
+  @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-5vw, -6vh) scale(1.08); } }
+  @keyframes drift3 { 0%,100% { transform: translate(-50%,-40%) scale(1); } 50% { transform: translate(-46%,-44%) scale(1.15); } }
+
+  .intro { height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; }
+  .intro .eyebrow { font-size: 0.75rem; letter-spacing: 0.25em; text-transform: uppercase; color: var(--text-sub); margin-bottom: 1.5rem; opacity: 0.85; }
+  .intro h1 { font-family: var(--font-display); font-weight: 500; font-size: clamp(2.5rem, 8vw, 5rem); color: var(--text-main); line-height: 1.05; margin-bottom: 1.25rem; }
+  .intro p.sub { font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: clamp(1rem, 2.5vw, 1.25rem); color: var(--text-sub); max-width: 32ch; line-height: 1.5; }
+  .intro .cue { position: absolute; bottom: 3rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-sub); opacity: 0.6; animation: bob 2.4s ease-in-out infinite; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+
+  .card { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; position: relative; }
+  .verse { font-family: var(--font-display); font-weight: 500; font-size: var(--verse-size); line-height: 1.35; max-width: 20ch; color: var(--text-main); opacity: 0; transform: translateY(20px); transition: opacity 1s ease, transform 1s ease, color 0.7s ease, font-size 0.4s ease; }
+  .card.visible .verse { opacity: 1; transform: translateY(0); }
+  .ref { margin-top: 1.75rem; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease 0.2s, color 0.7s ease; font-family: var(--font-body); }
+  .card.visible .ref { opacity: 0.85; }
+  .rule { width: 36px; height: 1px; background: var(--text-sub); opacity: 0; margin-bottom: 1.5rem; transition: opacity 1.1s ease, width 1.1s ease, background 0.7s ease; }
+  .card.visible .rule { opacity: 0.5; width: 60px; }
+
+  .actions { display: flex; gap: 1.25rem; margin-top: 1.75rem; opacity: 0; transition: opacity 1.1s ease 0.35s; }
+  .card.visible .actions { opacity: 0.85; }
+  .action-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; font-size: 1.15rem; color: var(--text-main); opacity: 0.65; transition: opacity 0.2s ease, transform 0.2s ease; line-height: 1; }
+  .action-btn:hover { opacity: 1; transform: scale(1.12); }
+  .action-btn.saved { opacity: 1; color: var(--accent); }
+
+  .lap { min-height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; }
+  .lap .count { font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: clamp(1.1rem, 3vw, 1.5rem); max-width: 26ch; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease, color 0.7s ease; }
+  .lap.visible .count { opacity: 0.85; }
+
+  .corner-btn { position: fixed; bottom: 1.5rem; z-index: 6; background: rgba(255,255,255,0.10); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 0.55rem 1rem; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-main); cursor: pointer; transition: background 0.2s ease; }
+  .corner-btn:hover { background: rgba(255,255,255,0.2); }
+  #fav-toggle { right: 1.5rem; }
+  #settings-toggle { left: 1.5rem; }
+
+  #fav-panel, #settings-panel { position: fixed; inset: 0; background: rgba(10,20,22,0.72); backdrop-filter: blur(8px); z-index: 20; display: none; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
+  #fav-panel.open, #settings-panel.open { display: flex; }
+  .panel-card { background: #f5f1e8; color: #1e2f2c; max-width: 480px; width: 100%; max-height: 82vh; overflow-y: auto; border-radius: 18px; padding: 1.75rem; }
+  .panel-card h3 { font-family: 'Fraunces', serif; font-weight: 500; font-size: 1.3rem; margin-bottom: 0.25rem; }
+  .panel-card .panel-sub { font-size: 0.75rem; opacity: 0.6; margin-bottom: 1.25rem; }
+
+  .fav-item { padding: 0.9rem 0; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; gap: 0.75rem; align-items: flex-start; }
+  .fav-item p { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.95rem; line-height: 1.4; }
+  .fav-item .fav-ref { display:block; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; margin-top: 0.35rem; font-family: 'Inter', sans-serif; font-style: normal; }
+  .fav-item button { background: none; border: none; cursor: pointer; opacity: 0.55; font-size: 1rem; flex-shrink: 0; }
+  .fav-item button:hover { opacity: 1; }
+  #fav-empty { font-size: 0.9rem; opacity: 0.6; font-style: italic; }
+
+  .panel-close { display: block; margin-top: 1.25rem; margin-left: auto; background: none; border: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; cursor: pointer; border-bottom: 1px solid currentColor; padding-bottom: 2px; font-family: 'Inter', sans-serif; }
+
+  .setting-group { margin-bottom: 1.5rem; }
+  .setting-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; margin-bottom: 0.65rem; font-family: 'Inter', sans-serif; }
+  .setting-options { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+  .opt-btn { border: 1.5px solid rgba(30,47,44,0.18); background: rgba(30,47,44,0.03); border-radius: 12px; padding: 0.6rem 0.9rem; font-size: 0.8rem; cursor: pointer; font-family: 'Inter', sans-serif; color: #1e2f2c; transition: border-color 0.2s ease, background 0.2s ease; text-align: left; }
+  .opt-btn.active { border-color: #1e2f2c; background: rgba(30,47,44,0.09); font-weight: 600; }
+  .opt-btn .opt-name { display: block; }
+  .opt-btn .opt-swatch { display: inline-block; width: 28px; height: 14px; border-radius: 4px; margin-right: 0.5rem; vertical-align: middle; }
+
+  .color-row { display: flex; align-items: center; gap: 0.75rem; }
+  .color-row input[type="color"] { -webkit-appearance: none; appearance: none; width: 42px; height: 42px; border: none; border-radius: 10px; padding: 0; cursor: pointer; background: none; }
+  .color-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; border-radius: 10px; }
+  .color-row input[type="color"]::-webkit-color-swatch { border: 1.5px solid rgba(30,47,44,0.18); border-radius: 10px; }
+  .color-row span.color-hex { font-size: 0.75rem; opacity: 0.55; font-family: 'Inter', sans-serif; }
+
+  .font-select { width: 100%; padding: 0.65rem 0.8rem; border-radius: 10px; border: 1.5px solid rgba(30,47,44,0.18); background: rgba(30,47,44,0.03); font-size: 0.9rem; color: #1e2f2c; font-family: 'Inter', sans-serif; cursor: pointer; }
+
+  #toast { position: fixed; bottom: 5.5rem; left: 50%; transform: translateX(-50%) translateY(20px); background: rgba(15,25,28,0.9); color: #f5f3ec; padding: 0.6rem 1.1rem; border-radius: 999px; font-size: 0.75rem; letter-spacing: 0.05em; z-index: 30; opacity: 0; pointer-events: none; transition: opacity 0.3s ease, transform 0.3s ease; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="ambient"><div class="glow a"></div><div class="glow b"></div><div class="glow c"></div><div id="orbs"></div></div>
+
+<button id="settings-toggle" class="corner-btn" onclick="openSettings()">⚙ Display</button>
+<button id="fav-toggle" class="corner-btn" onclick="openFavorites()">♡ Saved</button>
+<div id="toast"></div>
+
+<div id="fav-panel">
+  <div class="panel-card">
+    <h3>Saved verses</h3>
+    <div class="panel-sub">Kept for the days you need them again.</div>
+    <div id="fav-list"></div>
+    <button class="panel-close" onclick="closePanel('fav-panel')">Close</button>
+  </div>
+</div>
+
+<div id="settings-panel">
+  <div class="panel-card">
+    <h3>Display</h3>
+    <div class="panel-sub">Start from a preset, or make it your own.</div>
+
+    <div class="setting-group">
+      <div class="setting-label">Quick presets</div>
+      <div class="setting-options" id="palette-options"></div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Font</div>
+      <select class="font-select" id="font-select"></select>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Font color</div>
+      <div class="color-row">
+        <input type="color" id="text-color-input">
+        <span class="color-hex" id="text-color-hex"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Background color</div>
+      <div class="color-row">
+        <input type="color" id="bg-color-input">
+        <span class="color-hex" id="bg-color-hex"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Orb color</div>
+      <div class="color-row">
+        <input type="color" id="orb-color-input">
+        <span class="color-hex" id="orb-color-hex"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Text size</div>
+      <div class="setting-options" id="size-options"></div>
+    </div>
+
+    <button class="panel-close" onclick="closePanel('settings-panel')">Close</button>
+  </div>
+</div>
+
+<section class="intro">
+  <div class="eyebrow">Same thumb. Different fuel.</div>
+  <h1>Holy Doomscroll</h1>
+  <p class="sub">You were going to scroll anyway. Might as well scroll something that doesn't wreck you. Endless, on purpose.</p>
+  <div class="cue">Scroll ↓</div>
+</section>
+
+<div id="cards"></div>
+<div id="sentinel" style="height:1px;"></div>
+
+<script>
+const verses = [
+  { text: "The steadfast love of the LORD never ceaseth, his mercies never come to an end; they are new every morning.", ref: "Lamentations 3:22–23" },
+  { text: "Wait on the LORD: be of good courage, and he shall strengthen thine heart.", ref: "Psalm 27:14" },
+  { text: "For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.", ref: "Jeremiah 29:11" },
+  { text: "Why art thou cast down, O my soul? Hope thou in God: for I shall yet praise him.", ref: "Psalm 42:11" },
+  { text: "But they that wait upon the LORD shall renew their strength; they shall mount up with wings as eagles.", ref: "Isaiah 40:31" },
+  { text: "And we know that all things work together for good to them that love God.", ref: "Romans 8:28" },
+  { text: "Be not afraid, only believe.", ref: "Mark 5:36" },
+  { text: "The LORD is my light and my salvation; whom shall I fear?", ref: "Psalm 27:1" },
+  { text: "Let us hold fast the profession of our faith without wavering; for he is faithful that promised.", ref: "Hebrews 10:23" },
+  { text: "Now the God of hope fill you with all joy and peace in believing.", ref: "Romans 15:13" },
+  { text: "For yet a little while, and he that shall come will come, and will not tarry.", ref: "Hebrews 10:37" },
+  { text: "In my Father's house are many mansions... I go to prepare a place for you.", ref: "John 14:2" },
+  { text: "The LORD is nigh unto them that are of a broken heart.", ref: "Psalm 34:18" },
+  { text: "Cast thy burden upon the LORD, and he shall sustain thee.", ref: "Psalm 55:22" },
+  { text: "Weeping may endure for a night, but joy cometh in the morning.", ref: "Psalm 30:5" },
+  { text: "Trust in the LORD with all thine heart; and lean not unto thine own understanding.", ref: "Proverbs 3:5" },
+  { text: "This is the day which the LORD hath made; we will rejoice and be glad in it.", ref: "Psalm 118:24" },
+  { text: "He healeth the broken in heart, and bindeth up their wounds.", ref: "Psalm 147:3" },
+  { text: "Be strong and of a good courage... for the LORD thy God is with thee whithersoever thou goest.", ref: "Joshua 1:9" },
+  { text: "I have set the LORD always before me: because he is at my right hand, I shall not be moved.", ref: "Psalm 16:8" },
+];
+
+const laps = [
+  "Still here. Still held.",
+  "However far you scroll, this doesn't run out.",
+  "Take a breath. There's more when you're ready.",
+  "You're still being kept.",
+];
+
+/* ---------- display: independent controls, presets are just shortcuts ---------- */
+const presets = {
+  teal:     { name: 'Deep Teal',    bg: '#1f4a4f', orb: '#e4f0ec', text: '#f5f3ec', font: 'fraunces' },
+  dusk:     { name: 'Dusk Rose',    bg: '#4a2f3d', orb: '#f6dfc9', text: '#f6ede8', font: 'fraunces' },
+  quiet:    { name: 'Quiet Grey',   bg: '#2c3138', orb: '#e6e7e9', text: '#f2f1ee', font: 'plain' },
+  midnight: { name: 'Midnight Blue',bg: '#1e2a5e', orb: '#dbe3f7', text: '#f2f3f9', font: 'fraunces' },
+  forest:   { name: 'Forest Moss',  bg: '#2a3f28', orb: '#e7efdd', text: '#f2f3ec', font: 'playfair' },
+  sand:     { name: 'Warm Sand',    bg: '#57402a', orb: '#f7e9d2', text: '#f8f0e2', font: 'garamond' },
+};
+
+const fontOptions = {
+  fraunces:    { name: 'Fraunces',       family: "'Fraunces', serif" },
+  playfair:    { name: 'Playfair',       family: "'Playfair Display', serif" },
+  lora:        { name: 'Lora',           family: "'Lora', serif" },
+  garamond:    { name: 'EB Garamond',    family: "'EB Garamond', serif" },
+  merriweather:{ name: 'Merriweather',   family: "'Merriweather', serif" },
+  georgia:     { name: 'Georgia',        family: "Georgia, 'Times New Roman', serif" },
+  inter:       { name: 'Inter',          family: "'Inter', sans-serif" },
+  plain:       { name: 'Poppins',        family: "'Poppins', sans-serif" },
+};
+
+const sizes = {
+  small: { name: 'Small', size: 'clamp(1.25rem, 4vw, 2.1rem)' },
+  medium: { name: 'Medium', size: 'clamp(1.5rem, 4.6vw, 2.6rem)' },
+  large: { name: 'Large', size: 'clamp(1.75rem, 5.4vw, 3.1rem)' },
+};
+
+let prefs = { font: 'fraunces', textColor: '#f5f3ec', bgColor: '#1f4a4f', orbColor: '#e4f0ec', size: 'medium' };
+
+/* small color-math helpers so one background color can generate a full gradient */
+function hexToRgb(hex) {
+  hex = hex.replace('#', '');
+  if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+  const n = parseInt(hex, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+function rgbToHex(r, g, b) {
+  const c = v => Math.min(255, Math.max(0, Math.round(v))).toString(16).padStart(2, '0');
+  return '#' + c(r) + c(g) + c(b);
+}
+function shade(hex, percent) {
+  const [r, g, b] = hexToRgb(hex);
+  const target = percent < 0 ? 0 : 255;
+  const p = Math.abs(percent) / 100;
+  return rgbToHex(r + (target - r) * p, g + (target - g) * p, b + (target - b) * p);
+}
+
+function applyPrefs() {
+  const f = fontOptions[prefs.font] || fontOptions.fraunces;
+  const s = sizes[prefs.size] || sizes.medium;
+  const root = document.documentElement.style;
+
+  const top = shade(prefs.bgColor, -45);
+  const mid = shade(prefs.bgColor, -20);
+  root.setProperty('--bg-top', top);
+  root.setProperty('--bg-mid', mid);
+  root.setProperty('--bg-bottom', prefs.bgColor);
+  root.setProperty('--glow-a', shade(prefs.bgColor, -10));
+  root.setProperty('--glow-b', shade(prefs.bgColor, -25));
+  root.setProperty('--glow-c', shade(prefs.bgColor, 15));
+
+  root.setProperty('--orb-color', prefs.orbColor);
+  root.setProperty('--text-main', prefs.textColor);
+  root.setProperty('--text-sub', prefs.textColor);
+  root.setProperty('--accent', prefs.orbColor);
+
+  root.setProperty('--font-display', f.family);
+  root.setProperty('--verse-size', s.size);
+
+  syncSettingInputs();
+}
+
+function syncSettingInputs() {
+  const fontSelect = document.getElementById('font-select');
+  const textInput = document.getElementById('text-color-input');
+  const bgInput = document.getElementById('bg-color-input');
+  const orbInput = document.getElementById('orb-color-input');
+  if (!fontSelect) return; // panel not built yet
+  fontSelect.value = prefs.font;
+  textInput.value = prefs.textColor;
+  bgInput.value = prefs.bgColor;
+  orbInput.value = prefs.orbColor;
+  document.getElementById('text-color-hex').textContent = prefs.textColor;
+  document.getElementById('bg-color-hex').textContent = prefs.bgColor;
+  document.getElementById('orb-color-hex').textContent = prefs.orbColor;
+}
+
+function renderSettingOptions() {
+  const pWrap = document.getElementById('palette-options');
+  pWrap.innerHTML = Object.entries(presets).map(([key, v]) => `
+    <button class="opt-btn" data-preset="${key}">
+      <span class="opt-swatch" style="background:${v.bg}"></span><span class="opt-name">${v.name}</span>
+    </button>`).join('');
+  pWrap.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const preset = presets[btn.dataset.preset];
+      prefs = { ...prefs, bgColor: preset.bg, orbColor: preset.orb, textColor: preset.text, font: preset.font };
+      applyPrefs();
+      await savePrefs();
+    });
+  });
+
+  const fontSelect = document.getElementById('font-select');
+  fontSelect.innerHTML = Object.entries(fontOptions).map(([key, v]) =>
+    `<option value="${key}">${v.name}</option>`).join('');
+  fontSelect.addEventListener('change', async () => {
+    prefs.font = fontSelect.value;
+    applyPrefs();
+    await savePrefs();
+  });
+
+  document.getElementById('text-color-input').addEventListener('input', async (e) => {
+    prefs.textColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+  document.getElementById('bg-color-input').addEventListener('input', async (e) => {
+    prefs.bgColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+  document.getElementById('orb-color-input').addEventListener('input', async (e) => {
+    prefs.orbColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+
+  const sWrap = document.getElementById('size-options');
+  sWrap.innerHTML = Object.entries(sizes).map(([key, v]) => `
+    <button class="opt-btn${prefs.size === key ? ' active' : ''}" data-key="${key}">
+      <span class="opt-name">${v.name}</span>
+    </button>`).join('');
+  sWrap.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      prefs.size = btn.dataset.key;
+      applyPrefs();
+      renderSettingOptions();
+      await savePrefs();
+    });
+  });
+
+  syncSettingInputs();
+}
+
+async function loadPrefs() {
+  try {
+    const raw = localStorage.getItem('hopescroll_display_prefs');
+    if (raw) prefs = { ...prefs, ...JSON.parse(raw) };
+  } catch (e) { /* use defaults */ }
+}
+async function savePrefs() {
+  try { localStorage.setItem('hopescroll_display_prefs', JSON.stringify(prefs)); }
+  catch (e) { console.warn('Display choice could not be saved:', e); }
+}
+
+function openSettings() { renderSettingOptions(); document.getElementById('settings-panel').classList.add('open'); }
+function closePanel(id) { document.getElementById(id).classList.remove('open'); }
+
+/* ---------- favorites ---------- */
+const cardsContainer = document.getElementById('cards');
+const sentinel = document.getElementById('sentinel');
+const toastEl = document.getElementById('toast');
+
+const CYCLE_LEN = verses.length;
+const BATCH = 6;
+let cardIndex = 0;
+let sinceLastMarker = 0;
+let lapCount = 0;
+let lastVerseIdx = -1;
+let favorites = {};
+let persistOK = true;
+
+async function loadFavorites() {
+  try {
+    const raw = localStorage.getItem('hopescroll_favorites');
+    if (raw) favorites = JSON.parse(raw);
+  } catch (e) { favorites = {}; }
+}
+async function saveFavorites() {
+  try { localStorage.setItem('hopescroll_favorites', JSON.stringify(favorites)); persistOK = true; }
+  catch (e) { persistOK = false; console.warn('Favorites could not be saved:', e); }
+}
+function isFavorited(ref) { return !!favorites[ref]; }
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => toastEl.classList.remove('show'), 1800);
+}
+
+async function toggleFavorite(v) {
+  const removing = !!favorites[v.ref];
+  if (removing) delete favorites[v.ref];
+  else favorites[v.ref] = { text: v.text, ref: v.ref };
+  await saveFavorites();
+  showToast(removing ? 'Removed from saved' : (persistOK ? 'Saved ♥' : 'Saved for this visit'));
+  document.querySelectorAll(`.action-btn[data-ref="${cssEscape(v.ref)}"]`).forEach(b => {
+    b.classList.toggle('saved', !!favorites[v.ref]);
+    b.textContent = favorites[v.ref] ? '♥' : '♡';
+  });
+}
+function cssEscape(s) { return s.replace(/["\\]/g, '\\$&'); }
+
+async function shareVerse(v) {
+  const text = `"${v.text}" — ${v.ref}`;
+  if (navigator.share) {
+    try { await navigator.share({ text }); } catch (e) {}
+  } else {
+    try { await navigator.clipboard.writeText(text); showToast('Copied to clipboard'); }
+    catch (e) { showToast('Could not copy'); }
+  }
+}
+
+function openFavorites() {
+  const list = document.getElementById('fav-list');
+  const entries = Object.values(favorites);
+  if (entries.length === 0) {
+    list.innerHTML = '<div id="fav-empty">Nothing saved yet — tap ♡ on a verse to keep it here.</div>';
+  } else {
+    list.innerHTML = entries.map(v => `
+      <div class="fav-item">
+        <p>“${v.text}”<span class="fav-ref">${v.ref}</span></p>
+        <button data-ref="${cssEscape(v.ref)}" title="Share">↗</button>
+      </div>`).join('');
+    list.querySelectorAll('.fav-item button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const ref = btn.getAttribute('data-ref');
+        const v = favorites[ref];
+        if (v) shareVerse(v);
+      });
+    });
+  }
+  document.getElementById('fav-panel').classList.add('open');
+}
+
+/* ---------- floating orbs ---------- */
+function buildOrbs(n) {
+  const wrap = document.getElementById('orbs');
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < n; i++) {
+    const o = document.createElement('div');
+    o.className = 'orb';
+    const size = Math.round(24 + Math.random() * 70);
+    const top = Math.random() * 100;
+    const left = Math.random() * 100;
+    const dur = (28 + Math.random() * 24).toFixed(1);    // 28–52s, gentle
+    const delay = (-Math.random() * 15).toFixed(1);
+    const dx = (Math.random() * 22 - 11).toFixed(1);      // up to ±11vw
+    const dy = (Math.random() * 26 - 13).toFixed(1);      // up to ±13vh
+    const opacity = (0.07 + Math.random() * 0.12).toFixed(2); // much dimmer
+    o.style.width = size + 'px';
+    o.style.height = size + 'px';
+    o.style.top = top + '%';
+    o.style.left = left + '%';
+    o.style.opacity = opacity;
+    o.style.setProperty('--dur', dur + 's');
+    o.style.setProperty('--delay', delay + 's');
+    o.style.setProperty('--dx', dx + 'vw');
+    o.style.setProperty('--dy', dy + 'vh');
+    frag.appendChild(o);
+  }
+  wrap.appendChild(frag);
+}
+buildOrbs(14);
+
+/* ---------- feed ---------- */
+function pickRandomVerse() {
+  let i = Math.floor(Math.random() * verses.length);
+  if (verses.length > 1 && i === lastVerseIdx) {
+    i = (i + 1 + Math.floor(Math.random() * (verses.length - 1))) % verses.length;
+  }
+  lastVerseIdx = i;
+  return verses[i];
+}
+function nextVerse() {
+  if (sinceLastMarker >= CYCLE_LEN) {
+    sinceLastMarker = 0;
+    lapCount += 1;
+    return null;
+  }
+  sinceLastMarker += 1;
+  return pickRandomVerse();
+}
+
+function buildCard(v) {
+  const card = document.createElement('section');
+  card.className = 'card';
+  const saved = isFavorited(v.ref);
+  card.innerHTML = `
+    <div class="rule"></div>
+    <div class="verse">${v.text}</div>
+    <div class="ref">${v.ref}</div>
+    <div class="actions">
+      <button class="action-btn${saved ? ' saved' : ''}" data-ref="${v.ref}" title="Save">${saved ? '♥' : '♡'}</button>
+      <button class="action-btn" title="Share">↗</button>
+    </div>`;
+  const [saveBtn, shareBtn] = card.querySelectorAll('.action-btn');
+  saveBtn.addEventListener('click', () => toggleFavorite(v));
+  shareBtn.addEventListener('click', () => shareVerse(v));
+  return card;
+}
+function buildLapMarker() {
+  const el = document.createElement('section');
+  el.className = 'lap';
+  const msg = laps[lapCount % laps.length];
+  el.innerHTML = `<div class="count">${msg}</div>`;
+  return el;
+}
+function appendBatch() {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < BATCH; i++) {
+    const v = nextVerse();
+    frag.appendChild(v === null ? buildLapMarker() : buildCard(v));
+  }
+  cardsContainer.appendChild(frag);
+  observeNewCards();
+}
+
+const revealIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.35 });
+
+function observeNewCards() {
+  document.querySelectorAll('.card:not(.observed), .lap:not(.observed)').forEach(el => {
+    el.classList.add('observed');
+    revealIO.observe(el);
+  });
+}
+
+const loaderIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) appendBatch(); });
+}, { rootMargin: '1000px 0px 1000px 0px' });
+loaderIO.observe(sentinel);
+
+appendBatch();
+appendBatch();
+
+(async function init() {
+  await loadPrefs();
+  applyPrefs();
+  await loadFavorites();
+})();
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+
+</body>
+</html>

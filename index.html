@@ -771,9 +771,6 @@ const loaderIO = new IntersectionObserver((entries) => {
 }, { rootMargin: '1000px 0px 1000px 0px' });
 loaderIO.observe(sentinel);
 
-appendBatch();
-appendBatch();
-
 /* ---------- full-Bible upgrade (fetched once, cached in IndexedDB) ---------- */
 const BIBLE_URL = './kjv.json';
 const BIBLE_DB_NAME = 'holydoomscroller';
@@ -813,12 +810,22 @@ async function cacheBible(payload) {
   } catch { /* ignore — worst case we just refetch next time */ }
 }
 
-async function loadFullBible() {
-  const cached = await getCachedBible();
-  if (cached && cached.version === BIBLE_VERSION && Array.isArray(cached.data) && cached.data.length) {
-    verses = cached.data;
-    return;
-  }
+// Fast, local-only check. Safe to await before the first cards render — an IndexedDB
+// read is near-instant and this never touches the network, so it can't stall on being offline.
+async function tryLoadCachedBible() {
+  try {
+    const cached = await getCachedBible();
+    if (cached && cached.version === BIBLE_VERSION && Array.isArray(cached.data) && cached.data.length) {
+      verses = cached.data;
+      return true;
+    }
+  } catch { /* fall through to starter list */ }
+  return false;
+}
+
+// Network fetch. Only ever called when nothing usable was cached yet, and never awaited
+// before rendering — so a slow or missing connection can't delay the first cards.
+async function fetchAndCacheBible() {
   try {
     const res = await fetch(BIBLE_URL, { cache: 'force-cache' });
     if (!res.ok) throw new Error('fetch failed: ' + res.status);
@@ -832,13 +839,24 @@ async function loadFullBible() {
   }
 }
 
+async function bootFeed() {
+  const hadCache = await tryLoadCachedBible();
+  // Whether or not the swap happened, `verses` is now whatever it should be for this
+  // render — so the very first batch already draws randomly from the full set once
+  // it's been cached at least once before.
+  appendBatch();
+  appendBatch();
+  if (!hadCache) fetchAndCacheBible(); // background fetch for first-ever visits; doesn't block scrolling
+}
+bootFeed();
+
 (async function init() {
   await loadPrefs();
   applyPrefs();
   await loadFavorites();
-  loadFullBible(); // runs in the background — doesn't block first paint or the starter cards already on screen
 })();
 </script>
+
 
 </body>
 </html>

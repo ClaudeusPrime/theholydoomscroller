@@ -287,7 +287,7 @@
 <div id="sentinel" style="height:1px;"></div>
 
 <script>
-const verses = [
+let verses = [
   { text: "The steadfast love of the LORD never ceaseth, his mercies never come to an end; they are new every morning.", ref: "Lamentations 3:22–23" },
   { text: "Wait on the LORD: be of good courage, and he shall strengthen thine heart.", ref: "Psalm 27:14" },
   { text: "For I know the thoughts that I think toward you, saith the LORD, thoughts of peace, and not of evil, to give you an expected end.", ref: "Jeremiah 29:11" },
@@ -507,7 +507,7 @@ const cardsContainer = document.getElementById('cards');
 const sentinel = document.getElementById('sentinel');
 const toastEl = document.getElementById('toast');
 
-const CYCLE_LEN = verses.length;
+const CARDS_PER_LAP = 24; // pacing for the "still here" markers, independent of pool size
 const BATCH = 6;
 let cardIndex = 0;
 let sinceLastMarker = 0;
@@ -712,7 +712,7 @@ function pickRandomVerse() {
   return verses[i];
 }
 function nextVerse() {
-  if (sinceLastMarker >= CYCLE_LEN) {
+  if (sinceLastMarker >= CARDS_PER_LAP) {
     sinceLastMarker = 0;
     lapCount += 1;
     return null;
@@ -774,10 +774,69 @@ loaderIO.observe(sentinel);
 appendBatch();
 appendBatch();
 
+/* ---------- full-Bible upgrade (fetched once, cached in IndexedDB) ---------- */
+const BIBLE_URL = './kjv.json';
+const BIBLE_DB_NAME = 'holydoomscroller';
+const BIBLE_STORE = 'bible';
+const BIBLE_VERSION = 1; // bump this if kjv.json's content/blocklist changes, to invalidate old caches
+
+function openBibleDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(BIBLE_DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(BIBLE_STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getCachedBible() {
+  try {
+    const db = await openBibleDB();
+    return await new Promise((resolve) => {
+      const tx = db.transaction(BIBLE_STORE, 'readonly');
+      const req = tx.objectStore(BIBLE_STORE).get('kjv');
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => resolve(null);
+    });
+  } catch { return null; }
+}
+
+async function cacheBible(payload) {
+  try {
+    const db = await openBibleDB();
+    await new Promise((resolve) => {
+      const tx = db.transaction(BIBLE_STORE, 'readwrite');
+      tx.objectStore(BIBLE_STORE).put(payload, 'kjv');
+      tx.oncomplete = resolve;
+      tx.onerror = resolve;
+    });
+  } catch { /* ignore — worst case we just refetch next time */ }
+}
+
+async function loadFullBible() {
+  const cached = await getCachedBible();
+  if (cached && cached.version === BIBLE_VERSION && Array.isArray(cached.data) && cached.data.length) {
+    verses = cached.data;
+    return;
+  }
+  try {
+    const res = await fetch(BIBLE_URL, { cache: 'force-cache' });
+    if (!res.ok) throw new Error('fetch failed: ' + res.status);
+    const data = await res.json();
+    if (!Array.isArray(data) || !data.length) throw new Error('bad kjv.json payload');
+    verses = data;
+    cacheBible({ version: BIBLE_VERSION, data });
+  } catch (e) {
+    // Offline on first run, or kjv.json missing — silently keep the small starter list.
+    console.warn('Holy Doomscroller: could not load full KJV set, using starter verses.', e);
+  }
+}
+
 (async function init() {
   await loadPrefs();
   applyPrefs();
   await loadFavorites();
+  loadFullBible(); // runs in the background — doesn't block first paint or the starter cards already on screen
 })();
 </script>
 

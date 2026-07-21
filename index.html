@@ -15,7 +15,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Same endless scroll. Different fuel. Scripture that never runs out.">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600&family=MedievalSharp&display=swap');
 
   :root {
     --bg-top: #0e2027;
@@ -74,7 +74,7 @@
     border-radius: 50%;
     background: radial-gradient(circle, currentColor 0%, transparent 72%);
   }
-  .particle.p-cross svg { display: block; width: 100%; height: 100%; }
+  .particle.p-sword svg, .particle.p-shield svg, .particle.p-scroll svg, .particle.p-dove svg, .particle.p-flame svg, .particle.p-feather svg { display: block; width: 100%; height: 100%; }
 
   .particle.m-rise {
     filter: blur(1px);
@@ -100,6 +100,16 @@
     animation: twinkleStar var(--dur, 3.5s) ease-in-out infinite;
     animation-delay: var(--delay, 0s);
   }
+  .particle.m-flicker {
+    transform-origin: 50% 100%;
+    animation: flicker var(--dur, 2.4s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  .particle.m-fall {
+    filter: blur(0.3px);
+    animation: featherFall var(--dur, 20s) linear infinite;
+    animation-delay: var(--delay, 0s);
+  }
 
   @keyframes riseUp {
     0% { transform: translateY(0) translateX(0); opacity: 0; }
@@ -121,6 +131,19 @@
     0% { transform: translate(0, 0) scale(1); }
     50% { transform: translate(var(--dx, 6vw), var(--dy, -8vh)) scale(1.1); }
     100% { transform: translate(0, 0) scale(1); }
+  }
+  @keyframes flicker {
+    0%, 100% { opacity: var(--peak, 0.6); transform: scale(1) translateY(0); }
+    25% { opacity: calc(var(--peak, 0.6) * 0.65); transform: scale(0.9) translateY(-2px); }
+    50% { opacity: var(--peak, 0.6); transform: scale(1.08) translateY(1px); }
+    75% { opacity: calc(var(--peak, 0.6) * 0.8); transform: scale(0.96) translateY(-1px); }
+  }
+  @keyframes featherFall {
+    0% { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: var(--peak, 0.5); }
+    50% { transform: translateY(50vh) translateX(var(--dx, 4vw)) rotate(15deg); }
+    90% { opacity: var(--peak, 0.5); }
+    100% { transform: translateY(115vh) translateX(var(--dx2, -4vw)) rotate(-10deg); opacity: 0; }
   }
   .glow.a { width: 60vmax; height: 60vmax; top: -20vmax; left: -15vmax; background: radial-gradient(circle, var(--glow-a) 0%, transparent 70%); animation: drift1 70s ease-in-out infinite; }
   .glow.b { width: 55vmax; height: 55vmax; bottom: -25vmax; right: -18vmax; background: radial-gradient(circle, var(--glow-b) 0%, transparent 70%); animation: drift2 90s ease-in-out infinite; }
@@ -148,28 +171,45 @@
   .intro .cue { position: absolute; bottom: 3rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-sub); opacity: 0.6; animation: bob 2.4s ease-in-out infinite; }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
-  .card { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; position: relative; }
-  .verse { font-family: var(--font-display); font-weight: 500; font-size: var(--verse-size); line-height: 1.35; max-width: 20ch; color: var(--text-main); opacity: 0; transform: translateY(20px); transition: opacity 1s ease, transform 1s ease, color 0.7s ease, font-size 0.4s ease; }
-  .card.visible .verse { opacity: 1; transform: translateY(0); }
-  .ref { margin-top: 1.75rem; font-size: 0.8rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease 0.2s, color 0.7s ease; font-family: var(--font-body); }
-  .card.visible .ref { opacity: 0.85; }
-  .rule { width: 36px; height: 1px; background: var(--text-sub); opacity: 0; margin-bottom: 1.5rem; transition: opacity 1.1s ease, width 1.1s ease, background 0.7s ease; }
-  .card.visible .rule { opacity: 0.5; width: 60px; }
+  .card { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; position: relative; gap: 1.4rem; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .card-header { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease, color 0.7s ease; }
+  .card.visible .card-header { opacity: 0.7; }
+  .card-header svg { width: 13px; height: 13px; opacity: 0.75; }
 
-  .actions { display: flex; gap: 1.25rem; margin-top: 1.75rem; opacity: 0; transition: opacity 1.1s ease 0.35s; }
+  .card-box { width: min(340px, 82vw); aspect-ratio: 4 / 5; background: var(--card-bg, #f5f1e8); border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.75rem 1.5rem; position: relative; opacity: 0; transform: translateY(14px) scale(0.97); transition: opacity 0.9s ease, transform 0.9s ease, background 0.3s ease; }
+  .card.visible .card-box { opacity: 1; transform: translateY(0) scale(1); }
+
+  .verse { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.15rem, 4.4vw, 1.75rem); line-height: 1.35; max-width: 22ch; color: #1e2f2c; }
+  .rule { width: 36px; height: 1px; background: #1e2f2c; opacity: 0.35; margin-bottom: 1.5rem; }
+  .card-box .rule { transition: none; }
+
+  .heart-burst { position: absolute; top: 50%; left: 50%; font-size: 5.5rem; color: var(--accent); pointer-events: none; opacity: 0; transform: translate(-50%, -50%) scale(0.5); z-index: 2; }
+  .heart-burst.burst { animation: heartBurst 0.75s ease forwards; }
+  @keyframes heartBurst {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.4); }
+    22% { opacity: 0.95; transform: translate(-50%, -50%) scale(1.15); }
+    40% { transform: translate(-50%, -50%) scale(0.95); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  .actions { display: flex; gap: 1.25rem; opacity: 0; transition: opacity 1.1s ease 0.35s; }
   .card.visible .actions { opacity: 0.85; }
   .action-btn { background: none; border: none; cursor: pointer; padding: 0.5rem; font-size: 1.15rem; color: var(--text-main); opacity: 0.65; transition: opacity 0.2s ease, transform 0.2s ease; line-height: 1; }
   .action-btn:hover { opacity: 1; transform: scale(1.12); }
   .action-btn.saved { opacity: 1; color: var(--accent); }
 
+  #pull-indicator { position: fixed; top: 0; left: 50%; transform: translate(-50%, -100%); z-index: 15; display: flex; flex-direction: column; align-items: center; gap: 0.3rem; padding-top: 1.25rem; font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-sub); opacity: 0; transition: opacity 0.15s ease; pointer-events: none; }
+  #pull-indicator .pull-arrow { font-size: 1.1rem; transition: transform 0.15s ease; }
+  #pull-indicator.ready .pull-arrow { transform: rotate(180deg); }
+
   .lap { min-height: 55vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; }
   .lap .count { font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: clamp(1.1rem, 3vw, 1.5rem); max-width: 26ch; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease, color 0.7s ease; }
   .lap.visible .count { opacity: 0.85; }
 
-  .corner-btn { position: fixed; bottom: 1.5rem; z-index: 6; background: rgba(255,255,255,0.10); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 999px; padding: 0.55rem 1rem; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-main); cursor: pointer; transition: background 0.2s ease; }
+  .corner-btn { position: fixed; top: 1.25rem; z-index: 6; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.10); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; font-size: 1.15rem; color: var(--text-main); cursor: pointer; transition: background 0.2s ease; }
   .corner-btn:hover { background: rgba(255,255,255,0.2); }
-  #fav-toggle { right: 1.5rem; }
-  #settings-toggle { left: 1.5rem; }
+  #settings-toggle { right: 1.25rem; }
+  #fav-toggle { right: 4.4rem; }
 
   #fav-panel, #settings-panel { position: fixed; inset: 0; background: rgba(10,20,22,0.72); backdrop-filter: blur(8px); z-index: 20; display: none; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
   #fav-panel.open, #settings-panel.open { display: flex; }
@@ -210,8 +250,8 @@
 
 <div id="ambient"><div class="glow a"></div><div class="glow b"></div><div class="glow c"></div><div id="godrays"></div><div id="orbs"></div></div>
 
-<button id="settings-toggle" class="corner-btn" onclick="openSettings()">⚙ Display</button>
-<button id="fav-toggle" class="corner-btn" onclick="openFavorites()">♡ Saved</button>
+<button id="fav-toggle" class="corner-btn" onclick="openFavorites()" aria-label="Saved verses">♡</button>
+<button id="settings-toggle" class="corner-btn" onclick="openSettings()" aria-label="Display settings">⚙</button>
 <div id="toast"></div>
 
 <div id="fav-panel">
@@ -226,12 +266,8 @@
 <div id="settings-panel">
   <div class="panel-card">
     <h3>Display</h3>
-    <div class="panel-sub">Start from a preset, or make it your own.</div>
+    <div class="panel-sub">Make it your own.</div>
 
-    <div class="setting-group">
-      <div class="setting-label">Quick presets</div>
-      <div class="setting-options" id="palette-options"></div>
-    </div>
 
     <div class="setting-group">
       <div class="setting-label">Font</div>
@@ -263,6 +299,22 @@
     </div>
 
     <div class="setting-group">
+      <div class="setting-label">Card color</div>
+      <div class="color-row">
+        <input type="color" id="card-color-input">
+        <span class="color-hex" id="card-color-hex"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
+      <div class="setting-label">Card opacity</div>
+      <div class="color-row">
+        <input type="range" id="card-opacity-input" min="10" max="100" step="1" style="flex:1">
+        <span class="color-hex" id="card-opacity-value"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
       <div class="setting-label">Background motion</div>
       <div class="setting-options" id="bgstyle-options"></div>
     </div>
@@ -283,6 +335,7 @@
   <div class="cue">Scroll ↓</div>
 </section>
 
+<div id="pull-indicator"><span class="pull-arrow">&#8595;</span><span class="pull-label">pull to shuffle</span></div>
 <div id="cards"></div>
 <div id="sentinel" style="height:1px;"></div>
 
@@ -317,23 +370,30 @@ const laps = [
   "You're still being kept.",
 ];
 
-/* ---------- display: independent controls, presets are just shortcuts ---------- */
-const presets = {
-  navygold: { name: 'Navy & Gold',  bg: '#0a1128', orb: '#e8c468', text: '#f5f2e8', font: 'fraunces' },
-  teal:     { name: 'Deep Teal',    bg: '#1f4a4f', orb: '#e4f0ec', text: '#f5f3ec', font: 'fraunces' },
-  dusk:     { name: 'Dusk Rose',    bg: '#4a2f3d', orb: '#f6dfc9', text: '#f6ede8', font: 'fraunces' },
-  quiet:    { name: 'Quiet Grey',   bg: '#2c3138', orb: '#e6e7e9', text: '#f2f1ee', font: 'plain' },
-  midnight: { name: 'Midnight Blue',bg: '#1e2a5e', orb: '#dbe3f7', text: '#f2f3f9', font: 'fraunces' },
-  forest:   { name: 'Forest Moss',  bg: '#2a3f28', orb: '#e7efdd', text: '#f2f3ec', font: 'playfair' },
-  sand:     { name: 'Warm Sand',    bg: '#57402a', orb: '#f7e9d2', text: '#f8f0e2', font: 'garamond' },
-};
+const doomscrollerQuotes = [
+  { text: "Blessed are those who scroll past the outrage and remember what they were looking for.", ref: "Doomscroller 3:14" },
+  { text: "The feed is infinite. So, it turns out, is grace.", ref: "Doomscroller 1:7" },
+  { text: "Consider the thumbstop: it toils not, neither does it spin, yet it decides everything you see.", ref: "Doomscroller 6:22" },
+  { text: "Even the algorithm rests on the seventh scroll.", ref: "Doomscroller 7:1" },
+  { text: "Man does not live by content alone — though some days it's a near thing.", ref: "Doomscroller 4:9" },
+  { text: "He who is without notifications, let him cast the first like.", ref: "Doomscroller 2:18" },
+  { text: "There is a time to scroll, and a time to put the phone face-down and mean it.", ref: "Doomscroller 5:32" },
+  { text: "The doomscroller said: I have seen the bottom of the feed, and it does not exist.", ref: "Doomscroller 9:3" },
+  { text: "Refresh your feed as you would refresh your soul — rarely, and with intention.", ref: "Doomscroller 8:11" },
+  { text: "Whosoever loses their attention for the sake of a good thread shall find it again around 2am.", ref: "Doomscroller 11:26" },
+];
 
 const bgStyles = {
   godrays: { name: 'Godrays & Dust' },
-  crosses: { name: 'Gold Crosses' },
+  swords:  { name: 'Swords' },
+  shields: { name: 'Shields' },
+  scrolls: { name: 'Scrolls' },
+  doves:   { name: 'Doves' },
+  flames:  { name: 'Candle flames' },
+  feathers:{ name: 'Feathers' },
   embers:  { name: 'Embers' },
   stars:   { name: 'Stars' },
-  orbs:    { name: 'Orbs' },
+  orbs:    { name: 'Objects' },
 };
 
 const fontOptions = {
@@ -345,6 +405,7 @@ const fontOptions = {
   georgia:     { name: 'Georgia',        family: "Georgia, 'Times New Roman', serif" },
   inter:       { name: 'Inter',          family: "'Inter', sans-serif" },
   plain:       { name: 'Poppins',        family: "'Poppins', sans-serif" },
+  medieval:    { name: 'Medieval',       family: "'MedievalSharp', cursive" },
 };
 
 const sizes = {
@@ -353,7 +414,7 @@ const sizes = {
   large: { name: 'Large', size: 'clamp(1.75rem, 5.4vw, 3.1rem)' },
 };
 
-let prefs = { font: 'fraunces', textColor: '#f5f2e8', bgColor: '#0a1128', orbColor: '#e8c468', bgStyle: 'godrays', size: 'medium' };
+let prefs = { font: 'fraunces', textColor: '#f5f2e8', bgColor: '#0a1128', orbColor: '#e8c468', bgStyle: 'godrays', size: 'medium', cardColor: '#f5f1e8', cardOpacity: 100 };
 
 /* small color-math helpers so one background color can generate a full gradient */
 function hexToRgb(hex) {
@@ -392,6 +453,9 @@ function applyPrefs() {
   root.setProperty('--text-sub', prefs.textColor);
   root.setProperty('--accent', prefs.orbColor);
 
+  const [cr, cg, cb] = hexToRgb(prefs.cardColor);
+  root.setProperty('--card-bg', `rgba(${cr}, ${cg}, ${cb}, ${(prefs.cardOpacity ?? 100) / 100})`);
+
   root.setProperty('--font-display', f.family);
   root.setProperty('--verse-size', s.size);
 
@@ -407,31 +471,23 @@ function syncSettingInputs() {
   const textInput = document.getElementById('text-color-input');
   const bgInput = document.getElementById('bg-color-input');
   const orbInput = document.getElementById('orb-color-input');
+  const cardInput = document.getElementById('card-color-input');
+  const cardOpacityInput = document.getElementById('card-opacity-input');
   if (!fontSelect) return; // panel not built yet
   fontSelect.value = prefs.font;
   textInput.value = prefs.textColor;
   bgInput.value = prefs.bgColor;
   orbInput.value = prefs.orbColor;
+  cardInput.value = prefs.cardColor;
+  cardOpacityInput.value = prefs.cardOpacity;
   document.getElementById('text-color-hex').textContent = prefs.textColor;
   document.getElementById('bg-color-hex').textContent = prefs.bgColor;
   document.getElementById('orb-color-hex').textContent = prefs.orbColor;
+  document.getElementById('card-color-hex').textContent = prefs.cardColor;
+  document.getElementById('card-opacity-value').textContent = prefs.cardOpacity + '%';
 }
 
 function renderSettingOptions() {
-  const pWrap = document.getElementById('palette-options');
-  pWrap.innerHTML = Object.entries(presets).map(([key, v]) => `
-    <button class="opt-btn" data-preset="${key}">
-      <span class="opt-swatch" style="background:${v.bg}"></span><span class="opt-name">${v.name}</span>
-    </button>`).join('');
-  pWrap.querySelectorAll('.opt-btn').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const preset = presets[btn.dataset.preset];
-      prefs = { ...prefs, bgColor: preset.bg, orbColor: preset.orb, textColor: preset.text, font: preset.font };
-      applyPrefs();
-      await savePrefs();
-    });
-  });
-
   const fontSelect = document.getElementById('font-select');
   fontSelect.innerHTML = Object.entries(fontOptions).map(([key, v]) =>
     `<option value="${key}">${v.name}</option>`).join('');
@@ -453,6 +509,16 @@ function renderSettingOptions() {
   });
   document.getElementById('orb-color-input').addEventListener('input', async (e) => {
     prefs.orbColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+  document.getElementById('card-color-input').addEventListener('input', async (e) => {
+    prefs.cardColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+  document.getElementById('card-opacity-input').addEventListener('input', async (e) => {
+    prefs.cardOpacity = Number(e.target.value);
     applyPrefs();
     await savePrefs();
   });
@@ -511,6 +577,9 @@ const CARDS_PER_LAP = 24; // pacing for the "still here" markers, independent of
 const BATCH = 6;
 let cardIndex = 0;
 let sinceLastMarker = 0;
+let sinceLastQuote = 0;
+function randomQuoteThreshold() { return 24 + Math.floor(Math.random() * 27); } // 24..50
+let quoteThreshold = randomQuoteThreshold();
 let lapCount = 0;
 let lastVerseIdx = -1;
 let favorites = {};
@@ -581,7 +650,12 @@ function openFavorites() {
 }
 
 /* ---------- ambient background particles (several styles to pick from) ---------- */
-const crossSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="1" width="4" height="22" rx="1" fill="currentColor"/><rect x="1" y="10" width="22" height="4" rx="1" fill="currentColor"/></svg>`;
+const swordSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12.9 1.3l1.1 1.1-.9 11.4h-2.2l-.9-11.4 1.1-1.1a1 1 0 0 1 1.8 0z"/><rect x="6.5" y="13.8" width="11" height="2.1" rx="0.8"/><rect x="11" y="15.9" width="2" height="5.6" rx="0.6"/><rect x="9.7" y="21.3" width="4.6" height="1.5" rx="0.6"/></svg>`;
+const shieldSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 1.4l8 2.9v6.4c0 5.6-3.4 9.8-8 11.3-4.6-1.5-8-5.7-8-11.3V4.3z"/></svg>`;
+const scrollSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><rect x="3" y="9.2" width="18" height="5.6" rx="1"/><circle cx="3.6" cy="12" r="2.5"/><circle cx="20.4" cy="12" r="2.5"/></svg>`;
+const doveSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 14.5c3-4 6-4.5 8-2 2-2.5 5-2 8 2"/><path d="M2 9c3-3.3 6-3.8 8-2 2-1.8 5-1.3 8 2"/></svg>`;
+const flameSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M12 2c2 3 1 4.5-.3 6.3C10.5 9.7 9 11 9 13.5a3 3 0 0 0 6 0c0-1.4-.6-2.2-.6-2.2 1.4 1 2.6 2.8 2.6 4.7a5 5 0 1 1-10 0C7 11.5 10.5 8.5 12 2z"/><rect x="9.5" y="20.6" width="5" height="1.6" rx="0.5"/></svg>`;
+const featherSVG = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 2c-5 1-13 6-15 15 3-1 5-2 6-3"/><path d="M4 20l3-3"/><path d="M8 15l3-2M10 11l3-2M12 7l3-2"/></svg>`;
 
 let currentParticleStyle = null;
 const godraysEl = document.getElementById('godrays');
@@ -633,10 +707,10 @@ function buildParticles(styleKey) {
       p.style.setProperty('--peak', (0.35 + Math.random() * 0.35).toFixed(2));
       frag.appendChild(p);
     }
-  } else if (styleKey === 'crosses') {
+  } else if (styleKey === 'swords') {
     for (let i = 0; i < 13; i++) {
       const p = document.createElement('div');
-      p.className = 'particle p-cross m-drift';
+      p.className = 'particle p-sword m-drift';
       const size = Math.round(14 + Math.random() * 22);
       p.style.width = size + 'px';
       p.style.height = size + 'px';
@@ -647,7 +721,89 @@ function buildParticles(styleKey) {
       p.style.setProperty('--delay', (-Math.random() * 15).toFixed(1) + 's');
       p.style.setProperty('--dx', (Math.random() * 18 - 9).toFixed(1) + 'vw');
       p.style.setProperty('--dy', (Math.random() * 20 - 10).toFixed(1) + 'vh');
-      p.innerHTML = crossSVG;
+      p.innerHTML = swordSVG;
+      frag.appendChild(p);
+    }
+  } else if (styleKey === 'shields') {
+    for (let i = 0; i < 12; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle p-shield m-drift';
+      const size = Math.round(16 + Math.random() * 22);
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.opacity = (0.09 + Math.random() * 0.15).toFixed(2);
+      p.style.setProperty('--dur', (32 + Math.random() * 26).toFixed(1) + 's');
+      p.style.setProperty('--delay', (-Math.random() * 15).toFixed(1) + 's');
+      p.style.setProperty('--dx', (Math.random() * 16 - 8).toFixed(1) + 'vw');
+      p.style.setProperty('--dy', (Math.random() * 18 - 9).toFixed(1) + 'vh');
+      p.innerHTML = shieldSVG;
+      frag.appendChild(p);
+    }
+  } else if (styleKey === 'scrolls') {
+    for (let i = 0; i < 11; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle p-scroll m-drift';
+      const size = Math.round(20 + Math.random() * 20);
+      p.style.width = size + 'px';
+      p.style.height = (size * 0.55).toFixed(1) + 'px';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.opacity = (0.10 + Math.random() * 0.15).toFixed(2);
+      p.style.setProperty('--dur', (34 + Math.random() * 24).toFixed(1) + 's');
+      p.style.setProperty('--delay', (-Math.random() * 15).toFixed(1) + 's');
+      p.style.setProperty('--dx', (Math.random() * 16 - 8).toFixed(1) + 'vw');
+      p.style.setProperty('--dy', (Math.random() * 16 - 8).toFixed(1) + 'vh');
+      p.innerHTML = scrollSVG;
+      frag.appendChild(p);
+    }
+  } else if (styleKey === 'doves') {
+    for (let i = 0; i < 10; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle p-dove m-rise';
+      const size = Math.round(18 + Math.random() * 18);
+      p.style.width = size + 'px';
+      p.style.height = (size * 0.6).toFixed(1) + 'px';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.bottom = '-5%';
+      p.style.setProperty('--dur', (22 + Math.random() * 20).toFixed(1) + 's');
+      p.style.setProperty('--delay', (-Math.random() * 30).toFixed(1) + 's');
+      p.style.setProperty('--dx', (Math.random() * 20 - 10).toFixed(1) + 'vw');
+      p.style.setProperty('--peak', (0.3 + Math.random() * 0.3).toFixed(2));
+      p.innerHTML = doveSVG;
+      frag.appendChild(p);
+    }
+  } else if (styleKey === 'flames') {
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle p-flame m-flicker';
+      const size = Math.round(10 + Math.random() * 12);
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.top = (Math.random() * 100) + '%';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.setProperty('--dur', (1.6 + Math.random() * 1.8).toFixed(1) + 's');
+      p.style.setProperty('--delay', (-Math.random() * 3).toFixed(1) + 's');
+      p.style.setProperty('--peak', (0.45 + Math.random() * 0.4).toFixed(2));
+      p.innerHTML = flameSVG;
+      frag.appendChild(p);
+    }
+  } else if (styleKey === 'feathers') {
+    for (let i = 0; i < 15; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle p-feather m-fall';
+      const size = Math.round(16 + Math.random() * 18);
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = '-8%';
+      p.style.setProperty('--dur', (16 + Math.random() * 18).toFixed(1) + 's');
+      p.style.setProperty('--delay', (-Math.random() * 28).toFixed(1) + 's');
+      p.style.setProperty('--dx', (Math.random() * 14 - 7).toFixed(1) + 'vw');
+      p.style.setProperty('--dx2', (Math.random() * 14 - 7).toFixed(1) + 'vw');
+      p.style.setProperty('--peak', (0.3 + Math.random() * 0.35).toFixed(2));
+      p.innerHTML = featherSVG;
       frag.appendChild(p);
     }
   } else if (styleKey === 'embers') {
@@ -711,24 +867,62 @@ function pickRandomVerse() {
   lastVerseIdx = i;
   return verses[i];
 }
-function nextVerse() {
+let lastQuoteIdx = -1;
+function pickRandomQuote() {
+  let i = Math.floor(Math.random() * doomscrollerQuotes.length);
+  if (doomscrollerQuotes.length > 1 && i === lastQuoteIdx) {
+    i = (i + 1 + Math.floor(Math.random() * (doomscrollerQuotes.length - 1))) % doomscrollerQuotes.length;
+  }
+  lastQuoteIdx = i;
+  return doomscrollerQuotes[i];
+}
+function nextItem() {
   if (sinceLastMarker >= CARDS_PER_LAP) {
     sinceLastMarker = 0;
     lapCount += 1;
-    return null;
+    return { type: 'lap' };
   }
   sinceLastMarker += 1;
-  return pickRandomVerse();
+  sinceLastQuote += 1;
+  if (sinceLastQuote >= quoteThreshold) {
+    sinceLastQuote = 0;
+    quoteThreshold = randomQuoteThreshold();
+    return { type: 'quote', verse: pickRandomQuote() };
+  }
+  return { type: 'verse', verse: pickRandomVerse() };
 }
 
-function buildCard(v) {
+const BOOK_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5c2-1 5-1 8 0 3-1 6-1 8 0v13c-2-1-5-1-8 0-3-1-6-1-8 0z"/><path d="M12 5.5v13"/></svg>`;
+const HELMET_ICON = `<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 13c0-5 3.3-9 7.5-9s7.5 4 7.5 9v1.5c0 1-0.8 1.8-1.8 1.8h-1l-0.9 3H8.2l-0.9-3h-1c-1 0-1.8-0.8-1.8-1.8z"/><path d="M12 8v9.3"/><path d="M8.7 12h6.6"/></svg>`;
+
+let lastTapTime = 0;
+async function favoriteFromDoubleTap(v, card) {
+  if (!favorites[v.ref]) {
+    favorites[v.ref] = { text: v.text, ref: v.ref };
+    await saveFavorites();
+    card.querySelectorAll(`.action-btn[data-ref="${cssEscape(v.ref)}"]`).forEach(b => {
+      b.classList.add('saved');
+      b.textContent = '♥';
+    });
+    showToast(persistOK ? 'Saved ♥' : 'Saved for this visit');
+  }
+  const burst = card.querySelector('.heart-burst');
+  burst.classList.remove('burst');
+  void burst.offsetWidth; // restart animation if double-tapped again quickly
+  burst.classList.add('burst');
+}
+
+function buildCard(v, isQuote) {
   const card = document.createElement('section');
-  card.className = 'card';
+  card.className = 'card' + (isQuote ? ' quote-card' : '');
   const saved = isFavorited(v.ref);
   card.innerHTML = `
-    <div class="rule"></div>
-    <div class="verse">${v.text}</div>
-    <div class="ref">${v.ref}</div>
+    <div class="card-header">${isQuote ? HELMET_ICON : BOOK_ICON}<span>${v.ref}</span></div>
+    <div class="card-box">
+      <div class="rule"></div>
+      <div class="verse">${v.text}</div>
+      <div class="heart-burst">♥</div>
+    </div>
     <div class="actions">
       <button class="action-btn${saved ? ' saved' : ''}" data-ref="${v.ref}" title="Save">${saved ? '♥' : '♡'}</button>
       <button class="action-btn" title="Share">↗</button>
@@ -736,6 +930,12 @@ function buildCard(v) {
   const [saveBtn, shareBtn] = card.querySelectorAll('.action-btn');
   saveBtn.addEventListener('click', () => toggleFavorite(v));
   shareBtn.addEventListener('click', () => shareVerse(v));
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.action-btn')) return; // let the buttons handle their own taps
+    const now = Date.now();
+    if (now - lastTapTime < 350) favoriteFromDoubleTap(v, card);
+    lastTapTime = now;
+  });
   return card;
 }
 function buildLapMarker() {
@@ -748,10 +948,20 @@ function buildLapMarker() {
 function appendBatch() {
   const frag = document.createDocumentFragment();
   for (let i = 0; i < BATCH; i++) {
-    const v = nextVerse();
-    frag.appendChild(v === null ? buildLapMarker() : buildCard(v));
+    const item = nextItem();
+    if (item.type === 'lap') frag.appendChild(buildLapMarker());
+    else frag.appendChild(buildCard(item.verse, item.type === 'quote'));
   }
   cardsContainer.appendChild(frag);
+  observeNewCards();
+}
+function prependFreshVerses(count) {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < count; i++) {
+    const v = pickRandomVerse();
+    frag.appendChild(buildCard(v));
+  }
+  cardsContainer.insertBefore(frag, cardsContainer.firstChild);
   observeNewCards();
 }
 
@@ -849,6 +1059,38 @@ async function bootFeed() {
   if (!hadCache) fetchAndCacheBible(); // background fetch for first-ever visits; doesn't block scrolling
 }
 bootFeed();
+
+/* ---------- pull-to-refresh shuffle ---------- */
+const pullIndicator = document.getElementById('pull-indicator');
+const PULL_THRESHOLD = 70;
+let pullStartY = null;
+let pullDist = 0;
+
+window.addEventListener('touchstart', (e) => {
+  if (window.scrollY <= 0) pullStartY = e.touches[0].clientY;
+}, { passive: true });
+
+window.addEventListener('touchmove', (e) => {
+  if (pullStartY === null) return;
+  const dy = e.touches[0].clientY - pullStartY;
+  if (dy <= 0 || window.scrollY > 0) { pullStartY = null; pullIndicator.style.opacity = 0; return; }
+  pullDist = Math.min(dy, 120);
+  e.preventDefault();
+  pullIndicator.style.opacity = Math.min(pullDist / PULL_THRESHOLD, 1);
+  pullIndicator.style.transform = `translate(-50%, ${Math.min(pullDist, 90) - 100}%)`;
+  pullIndicator.classList.toggle('ready', pullDist >= PULL_THRESHOLD);
+}, { passive: false });
+
+window.addEventListener('touchend', () => {
+  if (pullStartY !== null && pullDist >= PULL_THRESHOLD) {
+    prependFreshVerses(3);
+    showToast('Fresh verses');
+  }
+  pullStartY = null;
+  pullDist = 0;
+  pullIndicator.style.opacity = 0;
+  pullIndicator.classList.remove('ready');
+});
 
 (async function init() {
   await loadPrefs();

@@ -220,8 +220,10 @@
   .fav-item { padding: 0.9rem 0; border-bottom: 1px solid rgba(0,0,0,0.08); display: flex; justify-content: space-between; gap: 0.75rem; align-items: flex-start; }
   .fav-item p { font-family: 'Fraunces', serif; font-style: italic; font-size: 0.95rem; line-height: 1.4; }
   .fav-item .fav-ref { display:block; font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; opacity: 0.6; margin-top: 0.35rem; font-family: 'Inter', sans-serif; font-style: normal; }
+  .fav-actions { display: flex; gap: 0.6rem; flex-shrink: 0; }
   .fav-item button { background: none; border: none; cursor: pointer; opacity: 0.55; font-size: 1rem; flex-shrink: 0; }
   .fav-item button:hover { opacity: 1; }
+  .fav-delete-btn:hover { color: #b3462c; opacity: 1; }
   #fav-empty { font-size: 0.9rem; opacity: 0.6; font-style: italic; }
 
   .panel-close { display: block; margin-top: 1.25rem; margin-left: auto; background: none; border: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; cursor: pointer; border-bottom: 1px solid currentColor; padding-bottom: 2px; font-family: 'Inter', sans-serif; }
@@ -654,13 +656,29 @@ function openFavorites() {
     list.innerHTML = entries.map(v => `
       <div class="fav-item">
         <p>“${v.text}”<span class="fav-ref">${v.ref}</span></p>
-        <button data-ref="${cssEscape(v.ref)}" title="Share">↗</button>
+        <div class="fav-actions">
+          <button class="fav-share-btn" data-ref="${cssEscape(v.ref)}" title="Share">↗</button>
+          <button class="fav-delete-btn" data-ref="${cssEscape(v.ref)}" title="Remove">✕</button>
+        </div>
       </div>`).join('');
-    list.querySelectorAll('.fav-item button').forEach(btn => {
+    list.querySelectorAll('.fav-share-btn').forEach(btn => {
       btn.addEventListener('click', () => {
         const ref = btn.getAttribute('data-ref');
         const v = favorites[ref];
         if (v) shareVerse(v);
+      });
+    });
+    list.querySelectorAll('.fav-delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const ref = btn.getAttribute('data-ref');
+        delete favorites[ref];
+        await saveFavorites();
+        document.querySelectorAll(`.action-btn[data-ref="${cssEscape(ref)}"]`).forEach(b => {
+          b.classList.remove('saved');
+          b.textContent = '♡';
+        });
+        openFavorites(); // re-render the list without this entry
+        showToast('Removed from saved');
       });
     });
   }

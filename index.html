@@ -15,7 +15,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="description" content="Same endless scroll. Different fuel. Scripture that never runs out.">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600&family=MedievalSharp&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Lora:ital,wght@0,400;0,500;1,400&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Poppins:wght@400;500;600&family=MedievalSharp&family=UnifrakturMaguntia&display=swap');
 
   :root {
     --bg-top: #0e2027;
@@ -179,8 +179,8 @@
   .card-box { width: min(340px, 82vw); aspect-ratio: 4 / 5; background: var(--card-bg, #f5f1e8); border-radius: 22px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.75rem 1.5rem; position: relative; opacity: 0; transform: translateY(14px) scale(0.97); transition: opacity 0.9s ease, transform 0.9s ease, background 0.3s ease; }
   .card.visible .card-box { opacity: 1; transform: translateY(0) scale(1); }
 
-  .verse { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.15rem, 4.4vw, 1.75rem); line-height: 1.35; max-width: 22ch; color: #1e2f2c; }
-  .rule { width: 36px; height: 1px; background: #1e2f2c; opacity: 0.35; margin-bottom: 1.5rem; }
+  .verse { font-family: var(--font-display); font-weight: 500; font-size: clamp(1.15rem, 4.4vw, 1.75rem); line-height: 1.35; max-width: 22ch; color: var(--card-text, #1e2f2c); }
+  .rule { width: 36px; height: 1px; background: var(--card-text, #1e2f2c); opacity: 0.35; margin-bottom: 1.5rem; }
   .card-box .rule { transition: none; }
 
   .heart-burst { position: absolute; top: 50%; left: 50%; font-size: 5.5rem; color: var(--accent); pointer-events: none; opacity: 0; transform: translate(-50%, -50%) scale(0.5); z-index: 2; }
@@ -206,10 +206,10 @@
   .lap .count { font-family: var(--font-display); font-style: italic; font-weight: 300; font-size: clamp(1.1rem, 3vw, 1.5rem); max-width: 26ch; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease, color 0.7s ease; }
   .lap.visible .count { opacity: 0.85; }
 
-  .corner-btn { position: fixed; top: 1.25rem; z-index: 6; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.10); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; font-size: 1.15rem; color: var(--text-main); cursor: pointer; transition: background 0.2s ease; }
+  .corner-btn { position: fixed; top: calc(1.25rem + env(safe-area-inset-top, 0px)); z-index: 6; width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.10); backdrop-filter: blur(6px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; font-size: 1.15rem; color: var(--text-main); cursor: pointer; transition: background 0.2s ease; }
   .corner-btn:hover { background: rgba(255,255,255,0.2); }
-  #settings-toggle { right: 1.25rem; }
-  #fav-toggle { right: 4.4rem; }
+  #settings-toggle { right: calc(1.25rem + env(safe-area-inset-right, 0px)); }
+  #fav-toggle { right: calc(4.4rem + env(safe-area-inset-right, 0px)); }
 
   #fav-panel, #settings-panel { position: fixed; inset: 0; background: rgba(10,20,22,0.72); backdrop-filter: blur(8px); z-index: 20; display: none; align-items: center; justify-content: center; padding: 2rem 1.25rem; }
   #fav-panel.open, #settings-panel.open { display: flex; }
@@ -225,6 +225,7 @@
   #fav-empty { font-size: 0.9rem; opacity: 0.6; font-style: italic; }
 
   .panel-close { display: block; margin-top: 1.25rem; margin-left: auto; background: none; border: none; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; cursor: pointer; border-bottom: 1px solid currentColor; padding-bottom: 2px; font-family: 'Inter', sans-serif; }
+  .panel-close-top { margin-top: 0; margin-bottom: 0.75rem; }
 
   .setting-group { margin-bottom: 1.5rem; }
   .setting-label { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; opacity: 0.55; margin-bottom: 0.65rem; font-family: 'Inter', sans-serif; }
@@ -256,15 +257,16 @@
 
 <div id="fav-panel">
   <div class="panel-card">
+    <button class="panel-close panel-close-top" onclick="closePanel('fav-panel')">Close</button>
     <h3>Saved verses</h3>
     <div class="panel-sub">Kept for the days you need them again.</div>
     <div id="fav-list"></div>
-    <button class="panel-close" onclick="closePanel('fav-panel')">Close</button>
   </div>
 </div>
 
 <div id="settings-panel">
   <div class="panel-card">
+    <button class="panel-close panel-close-top" onclick="closePanel('settings-panel')">Close</button>
     <h3>Display</h3>
     <div class="panel-sub">Make it your own.</div>
 
@@ -307,6 +309,14 @@
     </div>
 
     <div class="setting-group">
+      <div class="setting-label">Card text color</div>
+      <div class="color-row">
+        <input type="color" id="card-text-color-input">
+        <span class="color-hex" id="card-text-color-hex"></span>
+      </div>
+    </div>
+
+    <div class="setting-group">
       <div class="setting-label">Card opacity</div>
       <div class="color-row">
         <input type="range" id="card-opacity-input" min="10" max="100" step="1" style="flex:1">
@@ -324,7 +334,6 @@
       <div class="setting-options" id="size-options"></div>
     </div>
 
-    <button class="panel-close" onclick="closePanel('settings-panel')">Close</button>
   </div>
 </div>
 
@@ -406,6 +415,7 @@ const fontOptions = {
   inter:       { name: 'Inter',          family: "'Inter', sans-serif" },
   plain:       { name: 'Poppins',        family: "'Poppins', sans-serif" },
   medieval:    { name: 'Medieval',       family: "'MedievalSharp', cursive" },
+  gothic:      { name: 'Gothic',         family: "'UnifrakturMaguntia', cursive" },
 };
 
 const sizes = {
@@ -414,7 +424,7 @@ const sizes = {
   large: { name: 'Large', size: 'clamp(1.75rem, 5.4vw, 3.1rem)' },
 };
 
-let prefs = { font: 'fraunces', textColor: '#f5f2e8', bgColor: '#0a1128', orbColor: '#e8c468', bgStyle: 'godrays', size: 'medium', cardColor: '#f5f1e8', cardOpacity: 100 };
+let prefs = { font: 'fraunces', textColor: '#f5f2e8', bgColor: '#0a1128', orbColor: '#e8c468', bgStyle: 'godrays', size: 'medium', cardColor: '#f5f1e8', cardOpacity: 100, cardTextColor: '#1e2f2c' };
 
 /* small color-math helpers so one background color can generate a full gradient */
 function hexToRgb(hex) {
@@ -455,6 +465,7 @@ function applyPrefs() {
 
   const [cr, cg, cb] = hexToRgb(prefs.cardColor);
   root.setProperty('--card-bg', `rgba(${cr}, ${cg}, ${cb}, ${(prefs.cardOpacity ?? 100) / 100})`);
+  root.setProperty('--card-text', prefs.cardTextColor);
 
   root.setProperty('--font-display', f.family);
   root.setProperty('--verse-size', s.size);
@@ -472,6 +483,7 @@ function syncSettingInputs() {
   const bgInput = document.getElementById('bg-color-input');
   const orbInput = document.getElementById('orb-color-input');
   const cardInput = document.getElementById('card-color-input');
+  const cardTextInput = document.getElementById('card-text-color-input');
   const cardOpacityInput = document.getElementById('card-opacity-input');
   if (!fontSelect) return; // panel not built yet
   fontSelect.value = prefs.font;
@@ -479,11 +491,13 @@ function syncSettingInputs() {
   bgInput.value = prefs.bgColor;
   orbInput.value = prefs.orbColor;
   cardInput.value = prefs.cardColor;
+  cardTextInput.value = prefs.cardTextColor;
   cardOpacityInput.value = prefs.cardOpacity;
   document.getElementById('text-color-hex').textContent = prefs.textColor;
   document.getElementById('bg-color-hex').textContent = prefs.bgColor;
   document.getElementById('orb-color-hex').textContent = prefs.orbColor;
   document.getElementById('card-color-hex').textContent = prefs.cardColor;
+  document.getElementById('card-text-color-hex').textContent = prefs.cardTextColor;
   document.getElementById('card-opacity-value').textContent = prefs.cardOpacity + '%';
 }
 
@@ -514,6 +528,11 @@ function renderSettingOptions() {
   });
   document.getElementById('card-color-input').addEventListener('input', async (e) => {
     prefs.cardColor = e.target.value;
+    applyPrefs();
+    await savePrefs();
+  });
+  document.getElementById('card-text-color-input').addEventListener('input', async (e) => {
+    prefs.cardTextColor = e.target.value;
     applyPrefs();
     await savePrefs();
   });

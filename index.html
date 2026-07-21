@@ -171,7 +171,7 @@
   .intro .cue { position: absolute; bottom: 3rem; font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-sub); opacity: 0.6; animation: bob 2.4s ease-in-out infinite; }
   @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
-  .card { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 3rem 1.75rem; position: relative; gap: 1.4rem; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+  .card { min-height: 88vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 1.5rem 1.75rem; position: relative; gap: 1.2rem; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
   .card-header { display: flex; align-items: center; justify-content: center; gap: 0.4rem; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-sub); opacity: 0; transition: opacity 1.1s ease, color 0.7s ease; }
   .card.visible .card-header { opacity: 0.7; }
   .card-header svg { width: 20px; height: 20px; opacity: 0.8; }
@@ -963,6 +963,25 @@ function buildLapMarker() {
   el.innerHTML = `<div class="count">${msg}</div>`;
   return el;
 }
+const MAX_CARDS_IN_DOM = 120; // once we exceed this many cards on the page...
+const PRUNE_TO = 90;          // ...trim old ones off the top down to this many
+
+function pruneOldCards() {
+  const children = cardsContainer.children;
+  if (children.length <= MAX_CARDS_IN_DOM) return;
+  const removeCount = children.length - PRUNE_TO;
+  let removedHeight = 0;
+  for (let i = 0; i < removeCount; i++) {
+    const el = children[0]; // list shifts left as we remove, so always take the first
+    removedHeight += el.offsetHeight;
+    revealIO.unobserve(el);
+    el.remove();
+  }
+  // Removing content above the viewport would otherwise yank the scroll position
+  // upward — compensate so it's invisible to whoever's reading.
+  window.scrollBy(0, -removedHeight);
+}
+
 function appendBatch() {
   const frag = document.createDocumentFragment();
   for (let i = 0; i < BATCH; i++) {
@@ -972,6 +991,7 @@ function appendBatch() {
   }
   cardsContainer.appendChild(frag);
   observeNewCards();
+  pruneOldCards();
 }
 function prependFreshVerses(count) {
   const frag = document.createDocumentFragment();
